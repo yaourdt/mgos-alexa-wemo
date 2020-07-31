@@ -1,0 +1,27 @@
+author: mark dornbach <mark@dornbach.io>
+description: emulate a wemo upnp plug in amazon alexa
+type: lib
+version: 0.0.1
+
+platforms:           ["esp32", "esp8266"]
+manifest_version:    2020-01-29
+sources:             [src]
+includes:            [include]
+tags:                [c, net, upnp, alexa, wemo]
+
+config_schema:
+  - ["alexa_wemo", "o", {title: "WEMO UPnP plug emulation for Amazon Alexa"}]
+  - ["alexa_wemo.enable", "b", false, {title: "Enable plug emulation"}]
+  - ["alexa_wemo.port", "i", 7770, {title: "UPnP port of first instance"}]
+  - ["alexa_wemo.vendor", "s", "Alexmo", {title: "Vendor string. Should be 6 characters."}]
+  - ["alexa_wemo.model", "s", "virtual plug", {title: "Model string."}]
+  - ["alexa_wemo.description", "s", "", {title: "Human readable device description."}]
+
+libs:
+  - origin: https://github.com/mongoose-os-libs/mongoose
+  - origin: https://github.com/mongoose-os-libs/dns-sd
+  - origin: https://github.com/mongoose-os-libs/http-server
+
+init_after:
+  - ethernet
+  - wifi
