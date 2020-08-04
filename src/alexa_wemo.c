@@ -173,12 +173,20 @@ static void alexa_wemo_net_ev_handler(int ev, void *evd, void *arg) {
 	if (mgos_net_get_ip_info(MGOS_NET_IF_TYPE_WIFI, MGOS_NET_IF_WIFI_STA, &ip_info)) {
 		mgos_net_ip_to_str(&ip_info.ip, wemo_config->ip);
 	}
+
+	LOG(LL_DEBUG, ("Joining SSDP multicast group %s", SSDP_MCAST_GROUP));
+	if ( !mgos_mdns_hal_join_group(SSDP_MCAST_GROUP) ) { return; }
+
+	struct mg_connection *nc = mg_bind(mgos_get_mgr(), SSDP_LISTEN_ADDR, alexa_wemo_udp_in_ev, NULL);
+	if (nc == NULL) { LOG(LL_ERROR, ("Failed to bind to %s", SSDP_LISTEN_ADDR)); return; }
+	LOG(LL_INFO, ("Wemo emulation started. Listening on %s", SSDP_LISTEN_ADDR));
+
 	(void) evd;
 	(void) arg;
 }
 
 // *** init lib
-bool mgos_mgos_alexa_wemo_init(void) { // TODO bool mgos_mylib_init(void)
+bool mgos_mgos_alexa_wemo_init(void) {
 	bool success = false;
 	if ( !mgos_sys_config_get_alexa_wemo_enable() ) { success = true; goto out; }
 
@@ -186,14 +194,7 @@ bool mgos_mgos_alexa_wemo_init(void) { // TODO bool mgos_mylib_init(void)
 	wemo_config->nextId = 0;
 	mgos_event_add_group_handler(MGOS_EVENT_GRP_NET, alexa_wemo_net_ev_handler, NULL);
 
-	LOG(LL_DEBUG, ("Joining SSDP multicast group %s", SSDP_MCAST_GROUP));
-	if ( !mgos_mdns_hal_join_group(SSDP_MCAST_GROUP) ) { goto out; }
-
-	struct mg_connection *nc = mg_bind(mgos_get_mgr(), SSDP_LISTEN_ADDR, alexa_wemo_udp_in_ev, NULL);
-	if (nc == NULL) { LOG(LL_ERROR, ("Failed to bind to %s", SSDP_LISTEN_ADDR)); goto out; }
-
 	success = true;
-	LOG(LL_INFO, ("Wemo emulation init done. Listening on %s", SSDP_LISTEN_ADDR));
 out:
 	return success;
 }
