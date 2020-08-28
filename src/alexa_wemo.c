@@ -56,9 +56,11 @@ static void alexa_wemo_udp_in_ev(struct mg_connection *nc, int ev, void *ev_data
 
 		SLIST_FOREACH(e, &wemo_instances, next) {
 			if ( e->id == wemo_config->nextSend ) {
+				char time_buf[50];
+				mgos_strftime(&time_buf[0], sizeof(time_buf), "%a, %d %b %Y %H:%M:%S %Z", (int)time(NULL) );
 				mg_printf(nc, "HTTP/1.1 200 OK\r\n");
 				mg_printf(nc, "CACHE-CONTROL: max-age=86400\r\n");
-				mg_printf(nc, "DATE: Fri, 14 Aug 2020 02:42:00 GMT\r\n");
+				mg_printf(nc, "DATE: %s\r\n", &time_buf[0]);
 				mg_printf(nc, "EXT:\r\n");
 				mg_printf(nc, "LOCATION: http://%s:%i/setup.xml\r\n", wemo_config->ip, e->id + mgos_sys_config_get_alexa_wemo_port() );
 				mg_printf(nc, "OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n");
