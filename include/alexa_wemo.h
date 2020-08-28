@@ -1,1 +1,1 @@
-bool alexa_wemo_add_instance(char *name, int relay_pin);
+bool alexa_wemo_add_instance(const char *name, const int event_id, int *state);

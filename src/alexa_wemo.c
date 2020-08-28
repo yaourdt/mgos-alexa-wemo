@@ -19,8 +19,9 @@ alexa_wemo_service_config *wemo_config;
 // *** config per service entry
 struct alexa_wemo_service_entry {
 	int  id;
-	int  gpio_pin;
-	char *name;
+	int  event_id;
+	int* state;
+	const char *name;
 	char usn[15];
 	char uuid[37];
 	SLIST_ENTRY(alexa_wemo_service_entry) next;
@@ -116,16 +117,18 @@ static void alexa_wemo_http_in_ev(struct mg_connection *nc, int ev, void *ev_dat
 		if ( mg_strstr(hm->body, mg_mk_str("SetBinaryState") ) != NULL ) {
 			mg_printf(nc, "<u:SetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">");
 			if ( mg_strstr(hm->body, mg_mk_str("<BinaryState>1</BinaryState>") ) != NULL ) {
-				mgos_gpio_write(e->gpio_pin, 1);
+				struct mg_str msg = mg_mk_str("{\"power\": 1}");
+				mgos_event_trigger(e->event_id, &msg);
 				mg_printf(nc, "<BinaryState>1</BinaryState>");
 			} else {
-				mgos_gpio_write(e->gpio_pin, 0);
+				struct mg_str msg = mg_mk_str("{\"power\": 0}");
+				mgos_event_trigger(e->event_id, &msg);
 				mg_printf(nc, "<BinaryState>0</BinaryState>");
 			}
 			mg_printf(nc, "</u:SetBinaryStateResponse>");
 		} else {
 			mg_printf(nc, "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">");
-			mg_printf(nc, "<BinaryState>%i</BinaryState>", mgos_gpio_read(e->gpio_pin));
+			mg_printf(nc, "<BinaryState>%i</BinaryState>", *e->state);
 			mg_printf(nc, "</u:GetBinaryStateResponse>");
 		}
 		mg_printf(nc, "</s:Body></s:Envelope>\r\n");
@@ -138,7 +141,7 @@ static void alexa_wemo_http_in_ev(struct mg_connection *nc, int ev, void *ev_dat
 }
 
 // *** add a new virtual switch on a dedicated port
-bool alexa_wemo_add_instance(char *name, int gpio_pin) {
+bool alexa_wemo_add_instance(const char *name, const int event_id, int *state) {
 	bool success = false;
 	char port[6];
 	if ( !mgos_sys_config_get_alexa_wemo_enable() ) { success = true; goto out; }
@@ -151,7 +154,7 @@ bool alexa_wemo_add_instance(char *name, int gpio_pin) {
 	sprintf(e->usn , "%s-%x%s", mgos_sys_config_get_alexa_wemo_vendor(), wemo_config->nextId, mac + 6);
 	LOG(LL_DEBUG, ("UUID %s and USN %s generated.", e->uuid, e->usn));
 	e->name     = name;
-	e->gpio_pin = gpio_pin;
+	e->event_id = event_id;
 	e->id       = wemo_config->nextId;
 
 	sprintf(port, ":%i", e->id + mgos_sys_config_get_alexa_wemo_port() );
