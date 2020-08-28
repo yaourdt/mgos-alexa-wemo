@@ -148,7 +148,7 @@ bool alexa_wemo_add_instance(const char *name, const int event_id, int *state) {
 	if ( wemo_config->nextId > 15 ) { LOG(LL_ERROR, ("Max. number of instances reached")); goto out; }
 
 	struct alexa_wemo_service_entry *e;
-	if ((e = calloc(1, sizeof(*e))) == NULL) { LOG(LL_ERROR, ("Out of memory")); goto out; }
+	if ((e = malloc(sizeof(*e))) == NULL) { LOG(LL_ERROR, ("Out of memory")); goto out; }
 	const char *mac = mgos_sys_ro_vars_get_mac_address();
 	sprintf(e->uuid, "A2DAE02C-9E41-4856-ABF%x-%s", wemo_config->nextId, mac);
 	sprintf(e->usn , "%s-%x%s", mgos_sys_config_get_alexa_wemo_vendor(), wemo_config->nextId, mac + 6);
@@ -196,7 +196,6 @@ bool mgos_mgos_alexa_wemo_init(void) {
 	if ( !mgos_sys_config_get_alexa_wemo_enable() ) { success = true; goto out; }
 
 	if ((wemo_config = calloc(1, sizeof(*wemo_config))) == NULL) { LOG(LL_ERROR, ("Out of memory")); goto out; }
-	wemo_config->nextId = 0;
 	mgos_event_add_group_handler(MGOS_EVENT_GRP_NET, alexa_wemo_net_ev_handler, NULL);
 
 	success = true;
