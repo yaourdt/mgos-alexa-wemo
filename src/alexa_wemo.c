@@ -83,6 +83,9 @@ static void alexa_wemo_udp_in_ev(struct mg_connection *nc, int ev, void *ev_data
 		break;
 	case MG_EV_SEND:
 		wemo_config->send = true;
+		if ( wemo_config->nextSend == wemo_config->nextId ) {
+			nc->flags |= MG_F_SEND_AND_CLOSE;
+		}
 		break;
 	}
 	(void) ev_data;
