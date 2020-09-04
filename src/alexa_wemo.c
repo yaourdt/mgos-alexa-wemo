@@ -51,6 +51,7 @@ static void alexa_wemo_udp_in_ev(struct mg_connection *nc, int ev, void *ev_data
 	case MG_EV_POLL:
 		if ( wemo_config->nextSend == wemo_config->nextId ) {
 			mbuf_remove(&nc->recv_mbuf, nc->recv_mbuf.len);
+			nc->flags |= MG_F_SEND_AND_CLOSE;
 			break;
 		}
 		if ( !wemo_config->send ) { break; }
