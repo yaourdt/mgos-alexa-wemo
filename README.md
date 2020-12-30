@@ -21,3 +21,20 @@ libraries config.
 ## Acknowledgments
 This library is based on a blog post over at [makermusings.com](http://www.makermusings.com/2015/07/13/amazon-echo-and-home-automation/)
 and code from [kakopappas Alexa WEMO switch](https://github.com/kakopappa/arduino-esp8266-alexa-wemo-switch).
+
+## License
+
+Copyright (C) 2020, Mark Dornbach
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/.
